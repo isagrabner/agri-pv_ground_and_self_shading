@@ -40,4 +40,4 @@ Contains the parameters defining the PV system and sun position as well as dicti
 
 
 Licence:
-Windows95man - No Rules!
+MIT? Windows95man - No Rules!
