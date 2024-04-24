@@ -6,7 +6,7 @@ This is a program for visualizing the shade created by a PV system depending on 
 
 How to run:
 After installing the dependencies, the project can be run by simply downloading all project files and running main.py.
-Example images of how the inital window should look and one for the system switched to tracking can be found in the README folder.
+Example images of how the inital window should look and one for the system switched to tracking can be found in the Examples folder.
 
 
 Requirements:
