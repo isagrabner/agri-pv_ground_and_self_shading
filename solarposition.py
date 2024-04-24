@@ -35,22 +35,8 @@ def calculate_solarposition(year=2019, month=6, day=1, hour=12, minute=0, long=4
         angle_in_plane_NS = math.atan(height / abs(distance_NS)) if azimuth > 90 and azimuth < 270 else math.pi - math.atan(height / abs(distance_NS)) #if distance_NS > 0 else math.pi - math.atan(height / abs(distance_NS))
         angle_in_plane_EW = math.atan(height / abs(distance_EW)) if azimuth < 180 else math.pi - math.atan(height / abs(distance_EW)) #if distance_EW > 0 else math.pi - math.atan(height / abs(distance_EW))
 
-        #angle_in_plane_NS = math.atan(height / abs(distance_NS)) if distance_NS > 0 else math.pi - math.atan(height / abs(distance_NS))
-        #angle_in_plane_EW = math.atan(height / abs(distance_EW)) if distance_EW > 0 else math.pi - math.atan(height / abs(distance_EW))
-
     else:
         angle_in_plane_NS, angle_in_plane_EW = -1, -1
-
-    '''
-    # calculating angles in planes E/W and N/S
-    height = math.tan(apparent_elevation_rad)
-    section_EW = abs(math.sin(azimuth_rad))
-    #section_EW = math.sin(azimuth_rad)
-    section_NS = abs(math.cos(azimuth_rad))
-    #section_NS = - math.cos(azimuth_rad)
-
-    angle_in_plane_EW = math.atan(height / section_EW) + (0 if azimuth > 180 else math.pi/2)
-    angle_in_plane_NS = math.atan(height / section_NS) + (0 if azimuth < 90 or azimuth > 210 else math.pi/2)'''
 
     return angle_in_plane_EW, angle_in_plane_NS
 
