@@ -26,14 +26,13 @@ def calculate_solarposition(year=2019, month=6, day=1, hour=12, minute=0, long=4
     azimuth_rad = (azimuth / 180) * math.pi
 
     height = math.sin(apparent_elevation_rad)
-    offset_distance = math.cos(apparent_elevation_rad)
 
     if height >= 0:
-        distance_NS = offset_distance * (- math.cos(azimuth_rad))
-        distance_EW = offset_distance * math.sin(azimuth_rad)
+        distance_NS = - math.cos(azimuth_rad)
+        distance_EW = math.sin(azimuth_rad)
 
-        angle_in_plane_NS = math.atan(height / abs(distance_NS)) if azimuth > 90 and azimuth < 270 else math.pi - math.atan(height / abs(distance_NS)) #if distance_NS > 0 else math.pi - math.atan(height / abs(distance_NS))
-        angle_in_plane_EW = math.atan(height / abs(distance_EW)) if azimuth < 180 else math.pi - math.atan(height / abs(distance_EW)) #if distance_EW > 0 else math.pi - math.atan(height / abs(distance_EW))
+        angle_in_plane_NS = math.pi/2 - math.atan(distance_NS/height)
+        angle_in_plane_EW = math.pi/2 - math.atan(distance_EW/height)
 
     else:
         angle_in_plane_NS, angle_in_plane_EW = -1, -1
