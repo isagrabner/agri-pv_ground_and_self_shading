@@ -372,10 +372,10 @@ def update_system(selected_system):
             variables.tracking = False
 
             variables.ax_angle_NS_slider.set_visible(False)
-            variables.angle_NS_slider.set_val(90)
+            variables.angle_NS_slider.set_val(0)
 
             variables.ax_angle_EW_slider.set_visible(False)
-            variables.angle_EW_slider.set_val(0)
+            variables.angle_EW_slider.set_val(90)
 
         case 'optimal':
             # both angles are fixed (E/W angle = 0, N/S angle = 45 (stand in) - meant to represent conventional static PV systems)
@@ -392,8 +392,10 @@ def update_system(selected_system):
             variables.tracking = False
 
             variables.ax_angle_NS_slider.set_visible(True)
+            variables.angle_NS_slider.set_val(0)
         
             variables.ax_angle_EW_slider.set_visible(True)
+            variables.angle_EW_slider.set_val(0)
 
         case _:
             print('Something is going wrong regarding PV system selection.')
