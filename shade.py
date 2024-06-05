@@ -20,8 +20,8 @@ def calculate_shade(PV_angle_EW, PV_angle_NS, angle_in_plane_EW, angle_in_plane_
     # edge height differences
     height_diff_N = math.sin(PV_angle_NS_rad) * variables.PV_length / 2
     height_diff_S = - math.sin(PV_angle_NS_rad) * variables.PV_length / 2
-    height_diff_E = math.sin(PV_angle_EW_rad) * variables.PV_width / 2
-    height_diff_W = - math.sin(PV_angle_EW_rad) * variables.PV_width / 2
+    height_diff_E = - math.sin(PV_angle_EW_rad) * variables.PV_width / 2
+    height_diff_W = math.sin(PV_angle_EW_rad) * variables.PV_width / 2
 
     # corner height differences
     PV_height_NE = variables.PV_base_height + height_diff_N + height_diff_E
