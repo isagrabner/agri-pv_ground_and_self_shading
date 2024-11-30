@@ -42,8 +42,7 @@ for lat in range(34, 72):
 
                         for minute in range(0,60,15):
                             
-                            azimuth_rad = solarposition.calculate_azimuth_rad(year, month, day, hour, minute, long, lat)
-
+                            azimuth_rad, elevation_rad = solarposition.calculate_azimuth_and_elevation_rad(year, month, day, hour, minute, long, lat)
                             # position of pv panel needs to be readjusted with each time step for tracking systems
                             if system.system_type == 'tracking':
                                 system.tracking_repositioning(year, month, day, hour, minute, long, lat)
@@ -54,7 +53,7 @@ for lat in range(34, 72):
                             
                             # check if sun is over or under horizon in any case (< 0°), shade calculation is skipped in that case (shaded area and self-shade area are both set to 100%)
                             if apparent_elevation >= 0:
-                                intersection_percent, self_shade_percentage_of_total_panel_area = system.calculate_shade(angle_in_plane_EW, angle_in_plane_NS, field_width, field_length, azimuth_rad)
+                                intersection_percent, self_shade_percentage_of_total_panel_area = system.calculate_shade(angle_in_plane_EW, angle_in_plane_NS, field_width, field_length, azimuth_rad, elevation_rad)
                             else:
                                 intersection_percent = 100
                                 self_shade_percentage_of_total_panel_area = 100
