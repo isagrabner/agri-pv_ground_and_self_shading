@@ -50,18 +50,19 @@ class system:
         
             Returns: shade_total_area'''
         
-        if self.system_type == "tracking":
+        if self.system_type == "tracking" or self.system_type == "vertical":
 
             # width of shade on neighbouring panel
             angle_in_plane_EW_mod = angle_in_plane_EW if angle_in_plane_EW <= (math.pi/2) else math.pi - angle_in_plane_EW # angle above ground - making sun direction (from west or east) irrelevant
-            shade_width = self.PV_width - math.sin(angle_in_plane_EW_mod) * self.distance_EW
+            
+            if self.system_type == "tracking":
+                shade_width = self.PV_width - math.sin(angle_in_plane_EW_mod) * self.distance_EW
+            else:
+                shade_width = self.PV_width - math.tan(angle_in_plane_EW_mod) * self.distance_EW
 
             if shade_width > 0:
 
                 # shade length and offset
-                
-                # shade length (in N/S direction)
-                shade_length = self.PV_length
 
                 # for later calculation of offset of shade in N/S direction
                 if azimuth_rad <= math.pi/2:
@@ -75,104 +76,60 @@ class system:
                 else:
                     print("invalid azimuth")
 
-                # E/W distance of upper shade edge and upper panel edge casting the shadow
-                dis_shade_edge_from_center = math.cos(abs(PV_angle_EW_rad)) * (self.PV_width/2 - shade_width)
-                dis_panel_edge_from_center = math.cos(abs(PV_angle_EW_rad)) * (self.PV_width/2)
-
-                dis_EW_shade_panel = self.distance_EW - dis_shade_edge_from_center - dis_panel_edge_from_center
-
-                # offset of shade in N/S direction
-                shade_offset = dis_EW_shade_panel / math.tan(angle_off_center) 
-
-                # length (N/S direction) of shade on neighbouring collumn of panels (includes spaces between panels)
-                shaded_panel_length = self.number_of_panels_NS * self.distance_NS - shade_offset
-
-                # calculating number of fully shaded panels so spaces between panels can be excluded (here "fully shaded" means not affected by shade offset in N/S direction)
-                nmb_fully_shaded_panels = int(shaded_panel_length/self.distance_NS) * (self.number_of_panels_EW - 1) if self.distance_NS != 0 else 0
-
-                # checking if the shade offset "ends" in an area between panels or on a panel, adjusting shade accordingly
-                if shade_offset % self.distance_NS > (self.distance_NS - self.PV_length):
-                    shade_area_regular = (shade_width * shade_length - shade_width * (self.distance_NS - self.PV_length)) * nmb_fully_shaded_panels
+                # calculate height diff between upper shade edge and upper panel edge
+                if self.system_type == "tracking":
+                    height_diff_shade_panel = math.sin(abs(PV_angle_EW_rad)) * self.PV_width/2 + math.sin(abs(PV_angle_EW_rad)) * (self.PV_width/2 - shade_width)
                 else:
-                    shade_area_regular = (shade_width * shade_length - shade_width * (shade_offset % self.distance_NS)) * nmb_fully_shaded_panels
-
-                # shade on northernmost panels
-                shade_area_northern_edge = shade_width * (self.PV_length - shade_offset / self.distance_NS) * (self.number_of_panels_EW - 1)
-
-                #total shaded area 
-                shade_total_area = shade_area_northern_edge + shade_area_regular
-
-                if shade_total_area < 0:
-                    shade_total_area = 0
-
-            else:
-
-                shade_total_area = 0
-
-        elif self.system_type == "vertical":
-
-            # width of shade on neighbouring panel
-            angle_in_plane_EW_mod = angle_in_plane_EW if angle_in_plane_EW <= (math.pi/2) else math.pi - angle_in_plane_EW # angle above ground - making sun direction (from west or east) irrelevant
-            shade_width = self.PV_width - math.tan(angle_in_plane_EW_mod) * self.distance_EW
-
-            if shade_width > 0:
-
-                #shade length and offset
+                    height_diff_shade_panel = self.PV_width - shade_width
+                    
+                # calculate distance between upper panel edge and upper shade edge in plane of incoming sun beams
+                dist_panel_shade_sun_beam_dir = height_diff_shade_panel/math.tan(elevation_rad)
                 
-                # shade length (in N/S direction)
-                shade_length = self.PV_length
-
-                # for later calculation of offset of shade in N/S direction
-                if azimuth_rad <= math.pi/2:
-                    angle_off_center = azimuth_rad
-                elif math.pi/2 < azimuth_rad  and azimuth_rad <= math.pi:
-                    angle_off_center = math.pi - azimuth_rad
-                elif math.pi < azimuth_rad and azimuth_rad <= (3/2)*math.pi:
-                    angle_off_center = azimuth_rad - math.pi
-                elif (3/2)*math.pi < azimuth_rad:
-                    angle_off_center = 2*math.pi - azimuth_rad
-                else:
-                    print("invalid azimuth")
-
-                # E/W distance of upper shade edge and upper panel edge casting the shadow (= distance between panels in this case)
-                dis_EW_shade_panel = self.distance_EW
-
-                # offset of shade in N/S direction
-                shade_offset = dis_EW_shade_panel / math.tan(angle_off_center) # offset of shade in N/S direction
+                # offset in N/S direction
+                shade_offset = math.cos(angle_off_center) * dist_panel_shade_sun_beam_dir
 
                 # length (N/S direction) of shade on neighbouring collumn of panels (includes spaces between panels)
-                shaded_panel_length = self.number_of_panels_NS * self.distance_NS - shade_offset
+                shaded_panel_length = (self.number_of_panels_NS - 1) * self.distance_NS + self.PV_length - shade_offset
 
                 # calculating number of fully shaded panels so spaces between panels can be excluded (here "fully shaded" means not affected by shade offset in N/S direction)
-                nmb_fully_shaded_panels = int(shaded_panel_length/self.distance_NS) * (self.number_of_panels_EW - 1) if self.distance_NS != 0 else 0
-
-                # checking if the shade offset "ends" in an area between panels or on a panel, adjusting shade accordingly
-                if shade_offset % self.distance_NS > (self.distance_NS - self.PV_length):
-                    shade_area_regular = (shade_width * shade_length - shade_width * (self.distance_NS - self.PV_length)) * nmb_fully_shaded_panels
+                if shaded_panel_length < self.PV_length:
+                    nmb_fully_shaded_panels = 0
+                elif shaded_panel_length >= self.PV_length and shaded_panel_length <= self.distance_NS:
+                    nmb_fully_shaded_panels = 1 * (self.number_of_panels_EW - 1)
                 else:
-                    shade_area_regular = (shade_width * shade_length - shade_width * (shade_offset % self.distance_NS)) * nmb_fully_shaded_panels
+                    nmb_fully_shaded_panels = (int((shaded_panel_length - self.PV_length) / self.distance_NS) + 1) * (self.number_of_panels_EW - 1)
 
-                # shade on northernmost panels
-                shade_area_northern_edge = shade_width * (self.PV_length - shade_offset / self.distance_NS) * (self.number_of_panels_EW - 1)
+                # shade on fully shaded panels
+                shade_area_regular = shade_width * self.PV_length * nmb_fully_shaded_panels
+                
+                # checking if the shade offset "ends" in an area between panels or on a panel, adjusting shade accordingly
+                if shade_offset % self.distance_NS > self.PV_length: # in this case the shade offset ends between panels
+                    edge_panel_shade = 0
+                else:
+                    # shade on partially shaded panels
+                    edge_panel_shade = shade_width * (self.PV_length - (shade_offset % self.distance_NS)) * self.number_of_panels_EW
 
                 #total shaded area 
-                shade_total_area = shade_area_northern_edge + shade_area_regular
+                shade_total_area = shade_area_regular + edge_panel_shade
 
                 if shade_total_area < 0:
                     shade_total_area = 0
 
             else:
+
                 shade_total_area = 0
 
+        
         elif self.system_type == "optimal":
 
-            angle_in_plane_NS_mod = angle_in_plane_NS if angle_in_plane_NS <= (math.pi/2) else math.pi - angle_in_plane_EW  # angle above ground
-
+            if angle_in_plane_NS >= math.pi/2:
+                return 0
+                
             # angle between vertical line and sun beam
-            alpha = angle_in_plane_NS_mod
+            alpha = angle_in_plane_NS
 
             # angle between sun beam and (shaded) panel
-            beta = math.pi - (angle_in_plane_NS_mod + abs(PV_angle_NS_rad))
+            beta = math.pi - (angle_in_plane_NS + abs(PV_angle_NS_rad))
 
             # angle between shaded panel and vertical line
             gamma = math.pi - alpha - beta
@@ -189,10 +146,7 @@ class system:
 
             if shade_length > 0:
 
-                # shade width (E/W dir) and offset
-                
-                # shade width (E/W dir)
-                shade_width = self.PV_width
+                # shade offset
                 
                 # for later calculation of offset of shade in N/S direction
                 if azimuth_rad <= math.pi/2:
@@ -204,31 +158,43 @@ class system:
                 elif (3/2)*math.pi < azimuth_rad:
                     angle_off_center = 2*math.pi - azimuth_rad
                 else:
-                    print('why are u here')
+                    print('invalid azimuth')
 
                 # N/S distance upper shade edge - panel edge
                 dis_NS_shade_panel = pow(c, 2) / b
 
+                # calculate height diff between upper shade edge and upper panel edge
+                height_diff_shade_panel = math.sqrt(pow(c, 2) - pow(dis_NS_shade_panel, 2))
+                    
+                # calculate distance between upper panel edge and upper shade edge in plane of incoming sun beams
+                dist_panel_shade_sun_beam_dir = height_diff_shade_panel/math.tan(elevation_rad)
+
                 # offset of shade in E/W direction
-                shade_offset = dis_NS_shade_panel * math.tan(angle_off_center) 
+                shade_offset = math.cos(math.pi/2 - angle_off_center) * dist_panel_shade_sun_beam_dir
 
                 # length (N/S direction) of shade on neighbouring rows of panels (includes spaces between panels)
-                shaded_panel_width = self.number_of_panels_EW * self.distance_EW - shade_offset
+                shaded_panel_width = (self.number_of_panels_EW - 1) * self.distance_EW + self.PV_width - shade_offset
 
-                # calculating number of fully shaded panels so spaces between panels can be excluded (here "fully shaded" means not affected by shade offset in E/W direction)
-                nmb_fully_shaded_panels = int(shaded_panel_width/self.distance_NS) * (self.number_of_panels_NS - 1) if self.distance_NS != 0 else 0
-
-                # checking if the shade offset "ends" in an area between panels or on a panel, adjusting shade accordingly
-                if shade_offset % self.distance_EW > (self.distance_EW - self.PV_width):
-                    shade_area_regular = (shade_width * shade_length - shade_length * (self.distance_EW - self.PV_width)) * nmb_fully_shaded_panels
+               # calculating number of fully shaded panels so spaces between panels can be excluded (here "fully shaded" means not affected by shade offset in E/W direction)
+                if shaded_panel_width < self.PV_width:
+                    nmb_fully_shaded_panels = 0
+                elif shaded_panel_width >= self.PV_width and shaded_panel_width <= self.distance_EW:
+                    nmb_fully_shaded_panels = 1 * (self.number_of_panels_NS - 1)
                 else:
-                    shade_area_regular = (shade_width * shade_length - shade_length * (shade_offset % self.distance_EW)) * nmb_fully_shaded_panels
-
-                # shade on westernmost panels
-                shade_area_western_edge = shade_length * (self.PV_width - shade_offset / self.distance_EW) * (self.number_of_panels_NS - 1)
+                    nmb_fully_shaded_panels = (int((shaded_panel_width - self.PV_width) / self.distance_EW) + 1) * (self.number_of_panels_NS - 1)
+                    
+                # shade on fully shaded panels
+                shade_area_regular = shade_length * self.PV_width * nmb_fully_shaded_panels
+                
+                # checking if the shade offset "ends" in an area between panels or on a panel, adjusting shade accordingly
+                if shade_offset % self.distance_EW > self.PV_width: # in this case the shade offset ends between panels
+                    edge_panel_shade = 0
+                else:
+                    # shade on partially shaded panels
+                    edge_panel_shade = shade_length * (self.PV_width - (shade_offset % self.distance_EW)) * self.number_of_panels_NS
 
                 #total shaded area 
-                shade_total_area = shade_area_western_edge + shade_area_regular
+                shade_total_area = shade_area_regular + edge_panel_shade
 
                 if shade_total_area < 0:
                     shade_total_area = 0
