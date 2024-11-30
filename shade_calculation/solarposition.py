@@ -16,12 +16,12 @@ def find_nearest(array, value):
     return array[idx]
 
 
-def calculate_azimuth_rad(year=2019, month=6, day=1, hour=12, minute=0, long=47.6, lat=17.2):
+def calculate_azimuth_and_elevation_rad(year=2019, month=6, day=1, hour=12, minute=0, long=47.6, lat=17.2):
     ''' Calculates azimuth in rad based on date/time and location.
     
         Parameters: year, month, day, hour, minute, long, lat
         
-        Returns: azimuth_rad'''
+        Returns: azimuth_rad, elevation_rad'''
 
     # create datetime with timezone based on longitude and latitude
     obj = TimezoneFinder() 
@@ -30,11 +30,13 @@ def calculate_azimuth_rad(year=2019, month=6, day=1, hour=12, minute=0, long=47.
     # calculate solar position
     solar_position = solarposition.get_solarposition(date_time, long, lat)
     azimuth = float(solar_position.at[date_time,'azimuth'])
+    elevation = float(solar_position.at[date_time,'apparent_elevation'])
 
     # converting elevation and azimuth to rad
     azimuth_rad = (azimuth / 180) * math.pi
+    elevation_rad = (elevation / 180) * math.pi
 
-    return azimuth_rad
+    return azimuth_rad, elevation_rad
 
 
 def calculate_solarposition(year=2019, month=6, day=1, hour=12, minute=0, long=47.6, lat=17.2):
