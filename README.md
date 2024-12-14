@@ -24,7 +24,3 @@ Contains the class system, the instance variables of which are the parameters de
 
 solarposition.py
 Contains functions which involve determining the position of the sun at a given timestep.
-
-
-Licence:
-MIT?
