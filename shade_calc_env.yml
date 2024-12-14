@@ -44,4 +44,3 @@ dependencies:
       - timezonefinder==6.5.0
       - tzdata==2024.2
       - urllib3==2.2.3
-prefix: /home/igrabner/.conda/envs/shade_calc_env
