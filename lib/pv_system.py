@@ -67,9 +67,17 @@ class system:
     def calculate_self_shade(self, angle_in_plane_EW, angle_in_plane_NS, PV_angle_EW_rad, PV_angle_NS_rad, azimuth_rad):
         '''Calculates the total shaded area cast by PV panels onto other PV panels. (Currently only for tracking, optimal and vertical systems, since overhead systems are horizonal (hence no self-shading) at the moment.)
         
-            Parameters: angle_in_plane_EW, angle_in_plane_NS, PV_angle_EW_rad, PV_angle_NS_rad, azimuth_rad
+            Parameters: 
+            - angle_in_plane_EW: angle between ground and an incoming sun beam, projected on the east/west plane
+            - angle_in_plane_NS: angle between ground and an incoming sun beam, projected on the north/south plane
+            - PV_angle_EW_rad: tilt angle of the PV panel in the east/west plane in radians
+            - PV_angle_NS_rad: tilt angle of the PV panel in the north/south plane in radians
+            - azimuth_rad: azimuth in radians
+            - elevation_rad: elevation in radians
         
-            Returns: shade_total_area'''
+            Returns: 
+            - shade_total_area: total shaded area on the panels
+        '''
         
         if self.system_type == "tracking" or self.system_type == "vertical":
 
@@ -234,9 +242,17 @@ class system:
     def calculate_shade(self, angle_in_plane_EW, angle_in_plane_NS, field_width, field_length, azimuth_rad):
         ''' Calculates the position and area of the shade created by PV panels.
         
-            Parameters: angle_in_plane_EW, angle_in_plane_NS, field_width, field_length, azimuth_rad
+            Parameters: 
+            - angle_in_plane_EW: angle between ground and an incoming sun beam, projected on the east/west plane
+            - angle_in_plane_NS: angle between ground and an incoming sun beam, projected on the north/south plane
+            - field_width: witdth of the field without buffer
+            - field_length: length of the field without buffer
+            - azimuth_rad: azimuth in radians
             
-            Returns: intersection_percent, self_shade_percentage_of_total_panel_area'''
+            Returns:
+            - intersection_percent: shaded area of the field in percent of the total field area
+            - self_shade_percentage_of_total_panel_area: shaded area on the panels in percent of the total panel area
+        '''
         
         PV_angle_EW_rad = (self.PV_angle_EW / 180)*math.pi       # angle of the PV Panel (in east/west direction) (in rad)
         PV_angle_NS_rad = (self.PV_angle_NS / 180)*math.pi       # angle of the PV Panel (in north/south direction) (in rad)
