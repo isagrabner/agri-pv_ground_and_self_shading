@@ -102,8 +102,6 @@ class system:
                     angle_off_center = azimuth_rad - math.pi
                 elif (3/2)*math.pi < azimuth_rad:
                     angle_off_center = 2*math.pi - azimuth_rad
-                else:
-                    print("invalid azimuth")
 
                 # calculate height diff between upper shade edge and upper panel edge
                 if self.system_type == "tracking":
@@ -186,8 +184,6 @@ class system:
                     angle_off_center = azimuth_rad - math.pi
                 elif (3/2)*math.pi < azimuth_rad:
                     angle_off_center = 2*math.pi - azimuth_rad
-                else:
-                    print('invalid azimuth')
 
                 # N/S distance upper shade edge - panel edge
                 dis_NS_shade_panel = pow(c, 2) / b
