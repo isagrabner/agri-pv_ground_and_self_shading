@@ -5,6 +5,27 @@ from shapely.validation import make_valid
 
 class system:
     def __init__(self, system_type:str, PV_base_height:float, PV_width:float, PV_length:float, distance_EW:float, distance_NS:float, number_of_panels_EW:int, number_of_panels_NS:int, PV_angle_NS:float = 0, PV_angle_EW:float = 0):
+        ''' Instance Variables:
+            system_type: This is the type of system which will be simulated, all string inputs are currently possible, but self-shading will only be calculated to the following system types: "optimal", "vertical" and "tracking". In other cases, the self-shaded area will be set to zero if the sun is over the horizon. If the given system type is "tracking", the panel's tilt in the east/west plane (explained later) will be calculated automatically.
+            
+            PV_base_height: The base height describes the height of the center of the PV panel above ground. Measurement to be given in meters.
+            
+            PV_width: Describes the width of the PV panel, which is the dimension of the PV panel in east/west direction here. Measurement to be given in meters.
+            
+            PV_length: Describes the length of the PV panel, which is the dimension of the PV panel in north/south direction here. Measurement to be given in meters.
+            
+            distance_EW: This is the distance between PV panels along the east/west axis. It describes the distance between the same point on two panels (e.g. center to center). Measurement to be given in meters.
+            
+            distance_NS: This is the distance between PV panels along the north/south axis. It describes the distance between the same point on two panels (e.g. center to center). Measurement to be given in meters.
+            
+            number_of_panels_EW: This variable describes the number of PV panels along the east/west axis.
+            
+            number_of_panels_NS: This variable describes the number of PV panels along the north/south axis.
+            
+            PV_angle_NS: This is the tilt angle of the PV panel in the north/south plane. Measurements to be given in degrees.
+            
+            PV_angle_EW: This is the tilt angle of the PV panel in the north/south plane. This parameter does not need to be specified for all systems (with a default value is 0°) because it is automatically calculated for the tracking system. Measurements to be given in degrees.
+        '''
         self.system_type = system_type
         self.PV_base_height = PV_base_height
         self.PV_width = PV_width
