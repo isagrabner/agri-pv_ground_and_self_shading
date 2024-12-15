@@ -5,7 +5,9 @@ This program calculates the shaded area created by PV panels on a field in perce
 ## How to run
 After installing the dependencies, the project can be run by simply downloading all project files and running main.py.
 
-Example objects for simulatable system types (standard (current name: optimal), vertical, tracking and overhead systems) can be found at the top of the main.py file. It is possible to choose one of these (currently by uncommenting the chosen system, potential expansion: add possibility for input via terminal), or create your own pv_system object. To do the latter you can copy the syntax used to create the examples (again: potential expansion: add possibility for input via terminal) and change parameters where needed. The available instance variables are described in the following.
+Example objects for simulatable system types (standard (current name: optimal), vertical, tracking and overhead systems) can be found at the top of the main.py file. It is possible to choose one of these (currently by uncommenting the chosen system, potential expansion: add possibility for input via terminal), or create your own pv_system object. To do the latter you can copy the syntax used to create the examples (again: potential expansion: add possibility for input via terminal) and change parameters where needed. The available instance variables are described below.
+
+Additionally, the field measurements can be adjusted here. Length and width of the field are set to 80m by default, a 10m buffer is added on each side during shade calculation, resulting in an 100m by 100m (1ha) field.  
 
 ### Instance Variables:
 - **string system_type**:\
