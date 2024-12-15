@@ -185,11 +185,8 @@ class system:
                 elif (3/2)*math.pi < azimuth_rad:
                     angle_off_center = 2*math.pi - azimuth_rad
 
-                # N/S distance upper shade edge - panel edge
-                dis_NS_shade_panel = pow(c, 2) / b
-
                 # calculate height diff between upper shade edge and upper panel edge
-                height_diff_shade_panel = math.sqrt(pow(c, 2) - pow(dis_NS_shade_panel, 2))
+                height_diff_shade_panel = math.sin(gamma) * a
                     
                 # calculate distance between upper panel edge and upper shade edge in plane of incoming sun beams
                 dist_panel_shade_sun_beam_dir = height_diff_shade_panel/math.tan(elevation_rad)
