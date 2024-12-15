@@ -1,5 +1,6 @@
 import csv
 import datetime
+import math
 
 import pv_system
 import solarposition
@@ -43,6 +44,10 @@ for lat in range(34, 72):
                         for minute in range(0,60,15):
                             
                             azimuth_rad, elevation_rad = solarposition.calculate_azimuth_and_elevation_rad(year, month, day, hour, minute, long, lat)
+                            
+                            if azimuth_rad < 0 or azimuth_rad > 2*math.pi:
+                                raise invalid_azimuth
+                            
                             # position of pv panel needs to be readjusted with each time step for tracking systems
                             if system.system_type == 'tracking':
                                 system.tracking_repositioning(year, month, day, hour, minute, long, lat)
@@ -66,6 +71,9 @@ for lat in range(34, 72):
                                 writer_object.writerow(new_line)
                                 f_object.close()
                         
-                except:
+                except ValueError:
                     print("Error at lat=", lat, ", year=", year, ", month=", month, "day=", day)
+                    pass
+                except Exception as invalid_azimuth:
+                    print("Invalid azimuth calculated at lat=", lat, ", year=", year, ", month=", month, "day=", day)
                     pass
