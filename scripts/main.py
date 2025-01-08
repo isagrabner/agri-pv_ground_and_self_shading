@@ -1,6 +1,7 @@
 import csv
 import datetime
 import math
+import pandas as pd
 
 import pv_system
 import solarposition
@@ -11,6 +12,7 @@ import solarposition
 #system = pv_system.system("vertical", 1.4, 1.2, 80, 10, 80, 9, 1, 0, 90)
 #system = pv_system.system("overhead", 1.5, 1, 2, 2, 3, 41, 41, 0, 0) # should be altered to line up panel edges so eighter rows or collums can be approximated as one panel each
 system = pv_system.system("tracking", 1.4, 1.2, 80, 10, 80, 9, 1, 0) 
+#system = pv_system.system("backtracking", 1.4, 1.2, 80, 3, 80, 9, 1, 0)
 
 # longitude value
 long = 0
@@ -23,6 +25,9 @@ field_width = 80
 # field dimension in N/S direction (in m)
 field_length = 80
 
+# import lat dependent tilts for standard system
+lat_depentent_tilts = pd.read_csv("tilt_by_lat.csv")
+
 # specifications for results file
 columns=['lat', 'long', 'month', 'day', 'hour', 'minute', 'shaded area (in %)', 'self-shaded panel area (in ' + '%' + ' of total panel area)', 'proximate azimuth of sun', 'apparent elevation of sun']
 filename = str(system.get_name()) + '_shade_percent_15min.csv'
@@ -32,6 +37,11 @@ with open(filename, 'a') as f_object:
     f_object.close()
 
 for lat in range(34, 72):
+
+    # change panel tilt in optimal system depending on lat
+    if system.system_type == "optimal":
+        system.PV_angle_NS = lat_depentent_tilts["tilt (europe)"].where(lat_depentent_tilts["lat"] == int(lat)).dropna().values[0]
+        
     for year in range(2000, 2001):
         for month in range(1, 13):
             for day in range(1, 32):
@@ -51,7 +61,10 @@ for lat in range(34, 72):
                             # position of pv panel needs to be readjusted with each time step for tracking systems
                             if system.system_type == 'tracking':
                                 system.tracking_repositioning(year, month, day, hour, minute, long, lat)
-
+                            
+                            if system.system_type == 'backtracking':
+                                system.backtracking_repositioning(year, month, day, hour, minute, long, lat)
+                                
                             angle_in_plane_EW, angle_in_plane_NS = solarposition.calculate_solarposition(year, month, day, hour, minute, long, lat)
 
                             proximate_azimuth, apparent_elevation = solarposition.correct_solarposition(year, month, day, hour, minute, long, lat)
