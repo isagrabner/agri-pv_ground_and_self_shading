@@ -1,5 +1,4 @@
 from pvlib import solarposition
-from timezonefinder import TimezoneFinder
 import pandas as pd
 import math
 import numpy as np
@@ -23,12 +22,11 @@ def calculate_azimuth_and_elevation_rad(year=2019, month=6, day=1, hour=12, minu
         
         Returns: azimuth_rad, elevation_rad'''
 
-    # create datetime with timezone based on longitude and latitude
-    obj = TimezoneFinder() 
-    date_time = pd.Timestamp(year=year, month=month, day=day, hour=hour, minute=minute, tz = obj.timezone_at(lng=long, lat=lat))
-
+    # create datetime
+    date_time = pd.Timestamp(year=year, month=month, day=day, hour=hour, minute=minute)
+    
     # calculate solar position
-    solar_position = solarposition.get_solarposition(date_time, long, lat)
+    solar_position = solarposition.get_solarposition(date_time, lat, long)
     azimuth = float(solar_position.at[date_time,'azimuth'])
     elevation = float(solar_position.at[date_time,'apparent_elevation'])
 
@@ -48,12 +46,11 @@ def calculate_solarposition(year=2019, month=6, day=1, hour=12, minute=0, long=4
         
     # solar position
 
-    # create datetime with timezone based on longitude and latitude
-    obj = TimezoneFinder() 
-    date_time = pd.Timestamp(year=year, month=month, day=day, hour=hour, minute=minute, tz = obj.timezone_at(lng=long, lat=lat))
+    # create datetime
+    date_time = pd.Timestamp(year=year, month=month, day=day, hour=hour, minute=minute)
 
     # calculate solar position
-    solar_position = solarposition.get_solarposition(date_time, long, lat)
+    solar_position = solarposition.get_solarposition(date_time, lat, long)
     apparent_elevation = float(solar_position.at[date_time,'apparent_elevation'])
     azimuth = float(solar_position.at[date_time,'azimuth'])
 
@@ -83,12 +80,11 @@ def correct_solarposition(year, month, day, hour, minute, long, lat):#, horizon_
 
        Returns: proximate_azimuth, apparent_elevation'''
 
-    # create datetime with timezone based on longitude and latitude
-    obj = TimezoneFinder() 
-    date_time = pd.Timestamp(year=year, month=month, day=day, hour=hour, minute=minute, tz = obj.timezone_at(lng=long, lat=lat))
-
+    # create datetime
+    date_time = pd.Timestamp(year=year, month=month, day=day, hour=hour, minute=minute)
+    
     # calculate solar position
-    solar_position = solarposition.get_solarposition(date_time, long, lat)
+    solar_position = solarposition.get_solarposition(date_time, lat, long)
     apparent_elevation = float(solar_position.at[date_time,'apparent_elevation'])
     azimuth = float(solar_position.at[date_time,'azimuth'])
 
