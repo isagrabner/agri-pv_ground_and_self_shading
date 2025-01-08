@@ -62,7 +62,31 @@ class system:
         angle_in_plane_EW, angle_in_plane_NS = solarposition.calculate_solarposition(year, month, day, hour, minute, long, lat)
         angle_in_plane_EW_degrees = (angle_in_plane_EW / math.pi) * 180
         self.PV_angle_EW = 90 - angle_in_plane_EW_degrees
+
+    def backtracking_repositioning(self, year, month, day, hour, minute, long, lat):
+        '''Readjusts PV panel (tilt angle in E/W plane) depending on the position of the sun (which is calculated via date/time and location).
         
+            Parameters: year, month, day, hour, minute, long, lat
+        
+            Returns: - '''
+            
+        angle_in_plane_EW, angle_in_plane_NS = solarposition.calculate_solarposition(year, month, day, hour, minute, long, lat)
+
+        # regular tracking tilt
+        angle_in_plane_EW_degrees = (angle_in_plane_EW / math.pi) * 180
+        self.PV_angle_EW = 90 - angle_in_plane_EW_degrees
+
+        # calculate shade width in self-shading to check if self-shading occurs
+        angle_in_plane_EW_mod = angle_in_plane_EW if angle_in_plane_EW <= (math.pi/2) else math.pi - angle_in_plane_EW # angle above ground - making sun direction (from west or east) irrelevant
+        shade_width = self.PV_width - math.sin(angle_in_plane_EW_mod) * self.distance_EW
+
+        # adjust panel tilt in E/W plane so no self-shading occurs
+        if shade_width > 0 and angle_in_plane_EW > 0:
+            a = self.PV_width
+            b = self.distance_EW
+            c = b * math.cos(angle_in_plane_EW_mod) - math.sqrt(pow(b, 2) * pow(math.cos(angle_in_plane_EW_mod), 2) - pow(b, 2) + pow(a, 2))
+            PV_angle_EW_rad = (pow(c, 2) - pow(a, 2) - pow(b, 2))/(-2*a*c)
+            self.PV_angle_EW = -(PV_angle_EW_rad / math.pi) * 180 if angle_in_plane_EW <= (math.pi/2) else (PV_angle_EW_rad / math.pi) * 180
         
     def calculate_self_shade(self, angle_in_plane_EW, angle_in_plane_NS, PV_angle_EW_rad, PV_angle_NS_rad, azimuth_rad):
         '''Calculates the total shaded area cast by PV panels onto other PV panels. (Currently only for tracking, optimal and vertical systems, since overhead systems are horizonal (hence no self-shading) at the moment.)
