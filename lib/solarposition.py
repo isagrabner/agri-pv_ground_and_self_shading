@@ -14,8 +14,7 @@ def find_nearest(array, value):
     idx = (np.abs(array - value)).argmin()
     return array[idx]
 
-
-def calculate_azimuth_and_elevation_rad(year=2019, month=6, day=1, hour=12, minute=0, long=47.6, lat=17.2):
+def calculate_azimuth_and_elevation_rad(year, month, day, hour, minute, long, lat):
     ''' Calculates azimuth in rad based on date/time and location.
     
         Parameters: year, month, day, hour, minute, long, lat
@@ -36,16 +35,13 @@ def calculate_azimuth_and_elevation_rad(year=2019, month=6, day=1, hour=12, minu
 
     return azimuth_rad, elevation_rad
 
-
-def calculate_solarposition(year=2019, month=6, day=1, hour=12, minute=0, long=47.6, lat=17.2):
+def calculate_solarposition(year, month, day, hour, minute, long, lat):
     ''' Calculates the solar position depending on date/time and longitude/latitude. Converts solarposition to angles in the vertical planes in E/W and N/S direction.
     
         Parameters: year, month, day, hour, minute, long, lat
         
         Returns: angle_in_plane_EW, angle_in_plane_NS'''
         
-    # solar position
-
     # create datetime
     date_time = pd.Timestamp(year=year, month=month, day=day, hour=hour, minute=minute)
 
@@ -61,8 +57,8 @@ def calculate_solarposition(year=2019, month=6, day=1, hour=12, minute=0, long=4
     height = math.sin(apparent_elevation_rad)
 
     if height >= 0:
-        distance_NS = - math.cos(azimuth_rad) #offset_distance
-        distance_EW = math.sin(azimuth_rad) #offset_distance
+        distance_NS = - math.cos(azimuth_rad) * math.cos(apparent_elevation_rad) #offset_distance
+        distance_EW = math.sin(azimuth_rad) * math.cos(apparent_elevation_rad) #offset_distance
 
         angle_in_plane_NS = math.pi/2 - math.atan(distance_NS/height) 
         angle_in_plane_EW = math.pi/2 - math.atan(distance_EW/height)
@@ -72,8 +68,7 @@ def calculate_solarposition(year=2019, month=6, day=1, hour=12, minute=0, long=4
     
     return angle_in_plane_EW, angle_in_plane_NS
 
-
-def correct_solarposition(year, month, day, hour, minute, long, lat):#, horizon_data):
+def correct_solarposition(year, month, day, hour, minute, long, lat):
     '''Calculates sun elevation and proximate azimuth (nearest azimuth available in horizon data). Data is saved so validity of sun position (i.e. if the sun is below the horizon) can be checked later. 
     
        Parameters: year, month, day, hour, minute, long, lat
