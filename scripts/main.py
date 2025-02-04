@@ -5,14 +5,15 @@ import pandas as pd
 
 import pv_system
 import solarposition
+import shade_grid
 
 # current system specifications (rows/collums of panels are approximated as one large panel where possible)
 
-#system = pv_system.system("optimal", 1.5, 80, 2, 2, 10, 1, 9, 35, 0)
+#system = pv_system.system("standard", 1.5, 80, 2, 80, 10, 1, 9, 35, 0)
 #system = pv_system.system("vertical", 1.4, 1.2, 80, 10, 80, 9, 1, 0, 90)
-#system = pv_system.system("overhead", 1.5, 1, 2, 2, 3, 41, 41, 0, 0) # should be altered to line up panel edges so eighter rows or collums can be approximated as one panel each
+#system = pv_system.system("overhead", 1, 1, 80, 10, 80, 9, 1, 0, 10)
 system = pv_system.system("tracking", 1.4, 1.2, 80, 10, 80, 9, 1, 0) 
-#system = pv_system.system("backtracking", 1.4, 1.2, 80, 3, 80, 9, 1, 0)
+#system = pv_system.system("backtracking", 1.4, 1.2, 80, 10, 80, 9, 1, 0)
 
 # longitude value
 long = 0
@@ -36,10 +37,24 @@ with open(filename, 'a') as f_object:
     writer_object.writerow(columns)
     f_object.close()
 
-for lat in range(34, 72):
+# specifications for percentage of time shaded file - no horizons considered for this (just for comparing systems)
+columns=['lat', 'long', 'month', 'day']
+percentage_intervals = 5
 
+for i in range(1, percentage_intervals + 1):
+    new_column = str(round((i/percentage_intervals - 1/percentage_intervals) * 100, 1)) + " - " + str(round((i/percentage_intervals) * 100, 1)) + " %"
+    columns.append(new_column)
+
+filename_percent_of_time_shaded = str(system.get_name()) + '_percent_of_time_shaded.csv'
+
+with open(filename_percent_of_time_shaded, 'a') as f_object:
+    writer_object = csv.writer(f_object)
+    writer_object.writerow(columns)
+    f_object.close()
+
+for lat in range(34, 72):
     # change panel tilt in optimal system depending on lat
-    if system.system_type == "optimal":
+    if system.system_type == "standard":
         system.PV_angle_NS = lat_depentent_tilts["tilt (europe)"].where(lat_depentent_tilts["lat"] == int(lat)).dropna().values[0]
         
     for year in range(2000, 2001):
@@ -48,6 +63,7 @@ for lat in range(34, 72):
 
                 try:
                     datetime.datetime(year=year, month=month, day=day)
+                    grid = shade_grid.shade_grid(field_width, field_length)
 
                     for hour in range(0,24):
 
@@ -71,7 +87,7 @@ for lat in range(34, 72):
                             
                             # check if sun is over or under horizon in any case (< 0°), shade calculation is skipped in that case (shaded area and self-shade area are both set to 100%)
                             if apparent_elevation >= 0:
-                                intersection_percent, self_shade_percentage_of_total_panel_area = system.calculate_shade(angle_in_plane_EW, angle_in_plane_NS, field_width, field_length, azimuth_rad, elevation_rad)
+                                intersection_percent, self_shade_percentage_of_total_panel_area = system.calculate_shade(angle_in_plane_EW, angle_in_plane_NS, field_width, field_length, azimuth_rad, elevation_rad, grid)
                             else:
                                 intersection_percent = 100
                                 self_shade_percentage_of_total_panel_area = 100
@@ -83,6 +99,21 @@ for lat in range(34, 72):
                                 writer_object = csv.writer(f_object)
                                 writer_object.writerow(new_line)
                                 f_object.close()
+
+                    percentage_steps, percentage_counts_dict = grid.evaluate(percentage_intervals)
+                    
+                    # adding line to percentage of time shaded file
+                    new_line = [lat, long, round(month), round(day)]
+                    
+                    for bin in percentage_counts_dict:
+                        new_line.append(percentage_counts_dict[bin])
+
+                    with open(filename_percent_of_time_shaded, 'a') as f_object:
+                                writer_object = csv.writer(f_object)
+                                writer_object.writerow(new_line)
+                                f_object.close()
+
+                    grid.reset()
                         
                 except ValueError:
                     print("Error at lat=", lat, ", year=", year, ", month=", month, "day=", day)
